@@ -1,0 +1,464 @@
+//timer
+static unsigned long lastTick = 0;
+short unsigned segundos = 0;
+short unsigned minutos = 0;
+short unsigned horas = 0;
+//alarme
+short unsigned ALARMmin = 0;
+short unsigned ALARMh = 0;
+short alarmset = 0;
+short alarm = 0;
+//botões
+bool b0 = digitalRead(A0); //alarm set
+bool b1 = digitalRead(A1); //h+
+bool b2 = digitalRead(A2); //h-
+bool b3 = digitalRead(A3); //m+
+bool b4 = digitalRead(A4); //m-
+bool b5 = digitalRead(A5); //alarm on/off
+//leds
+const short LedM1 = 9;
+const short LedM2 = 8;
+const short LedM4 = 7;
+const short LedM8 = 6;
+const short LedM10 = 3;
+const short LedM20 = 4;
+const short LedM40 = 5;
+const short LedH1 = 13;
+const short LedH2 = 12;
+const short LedH4 = 11;
+const short LedH8 = 10;
+const short LedH10 = 1;
+const short LedH20 = 0;
+//buzzer
+const short buzzer = 2;
+//notas para melodia
+#define c 261
+#define d 294
+#define e 329
+#define f 349
+#define g 391
+#define gS 415
+#define a 440
+#define aS 455
+#define b 466
+#define cH 523
+#define cSH 554
+#define dH 587
+#define dSH 622
+#define eH 659
+#define fH 698
+#define fSH 740
+#define gH 784
+#define gSH 830
+#define aH 880
+
+void setup() {
+  pins();
+  ledsoff();
+}
+
+void loop() {
+  timer();
+  if (digitalRead(A5) == HIGH) {
+    alarm = alarm + 1;
+    ledsblink();
+    ledsblink();
+    while (alarm == 1)  {
+      timer();
+      timecheck();
+      LEDminutos(minutos);
+      LEDhoras(horas);
+      buttons();
+      if (digitalRead(A5) == HIGH) {
+        alarm = 0;
+        ledsblink();
+        delay(250);
+      }
+    }
+  } else {
+    timer();
+    LEDminutos(minutos);
+    LEDhoras(horas);
+    buttons();
+    if (digitalRead(A0) == HIGH) {
+      alarmset = 1;
+      digitalWrite(buzzer, HIGH);
+      delay(250);
+      digitalWrite(buzzer, LOW);
+      delay(50);
+      ledsoff();
+      while (alarmset == 1) {
+        timer();
+        LEDminutos(ALARMmin);
+        LEDhoras(ALARMh);
+        bALARM();
+        if (digitalRead(A0) == HIGH) {
+          alarmset = 0;
+          digitalWrite(buzzer, HIGH);
+          delay(100);
+          digitalWrite(buzzer, LOW);
+          delay(150);
+          digitalWrite(buzzer, HIGH);
+          delay(100);
+          digitalWrite(buzzer, LOW);
+          delay(150);
+        }
+      }
+    }
+  }
+}
+
+void pins() {
+  pinMode(LedM1, OUTPUT);
+  pinMode(LedM2, OUTPUT);
+  pinMode(LedM4, OUTPUT);
+  pinMode(LedM8, OUTPUT);
+  pinMode(LedM10, OUTPUT);
+  pinMode(LedM20, OUTPUT);
+  pinMode(LedM40, OUTPUT);
+  pinMode(LedH1, OUTPUT);
+  pinMode(LedH2, OUTPUT);
+  pinMode(LedH4, OUTPUT);
+  pinMode(LedH8, OUTPUT);
+  pinMode(LedH10, OUTPUT);
+  pinMode(LedH20, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
+}
+
+void ledsoff() {
+  digitalWrite(LedM1, LOW);
+  digitalWrite(LedM2, LOW);
+  digitalWrite(LedM4, LOW);
+  digitalWrite(LedM8, LOW);
+  digitalWrite(LedM10, LOW);
+  digitalWrite(LedM20, LOW);
+  digitalWrite(LedM40, LOW);
+  digitalWrite(LedH1, LOW);
+  digitalWrite(LedH2, LOW);
+  digitalWrite(LedH4, LOW);
+  digitalWrite(LedH8, LOW);
+  digitalWrite(LedH10, LOW);
+  digitalWrite(LedH20, LOW);
+}
+
+void ledson() {
+  digitalWrite(LedM1, HIGH);
+  digitalWrite(LedM2, HIGH);
+  digitalWrite(LedM4, HIGH);
+  digitalWrite(LedM8, HIGH);
+  digitalWrite(LedM10, HIGH);
+  digitalWrite(LedM20, HIGH);
+  digitalWrite(LedM40, HIGH);
+  digitalWrite(LedH1, HIGH);
+  digitalWrite(LedH2, HIGH);
+  digitalWrite(LedH4, HIGH);
+  digitalWrite(LedH8, HIGH);
+  digitalWrite(LedH10, HIGH);
+  digitalWrite(LedH20, HIGH);
+}
+
+void ledsblink() {
+  ledsoff();
+  delay(100);
+  digitalWrite(buzzer, HIGH);
+  ledson();
+  delay(150);
+  digitalWrite(buzzer, LOW);
+  delay(300);
+  ledsoff();
+}
+
+void timer() {
+  if (millis () - lastTick >= 1000) {
+    lastTick = lastTick + 1000;
+    segundos++;
+  }
+
+  if (segundos == 60) {
+    minutos++;
+    segundos = 0;
+  }
+
+  if (minutos == 60) {
+    horas++;
+    minutos = 0;
+    digitalWrite(buzzer, HIGH);
+    delay(300);
+    digitalWrite(buzzer, LOW);
+  }
+
+  if (horas == 24) {
+    minutos = 0;
+    segundos = 0;
+    horas = 0;
+  }
+}
+
+void LEDminutos(short minutes) {
+  short MLed = minutes;
+  if (MLed >= 40) {
+    digitalWrite(LedM40, HIGH);
+    MLed = MLed - 40;
+  } else {
+    digitalWrite(LedM40, LOW);
+  }
+
+  if (MLed >= 20) {
+    digitalWrite(LedM20, HIGH);
+    MLed = MLed - 20;
+  } else {
+    digitalWrite(LedM20, LOW);
+  }
+
+  if (MLed >= 10) {
+    digitalWrite(LedM10, HIGH);
+    MLed = MLed - 10;
+  } else {
+    digitalWrite(LedM10, LOW);
+  }
+
+  if (MLed >= 8) {
+    digitalWrite(LedM8, HIGH);
+    MLed = MLed - 8;
+  } else {
+    digitalWrite(LedM8, LOW);
+  }
+
+  if (MLed >= 4) {
+    digitalWrite(LedM4, HIGH);
+    MLed = MLed - 4;
+  } else {
+    digitalWrite(LedM4, LOW);
+  }
+
+  if (MLed >= 2) {
+    digitalWrite(LedM2, HIGH);
+    MLed = MLed - 2;
+  } else {
+    digitalWrite(LedM2, LOW);
+  }
+
+  if (MLed == 1) {
+    digitalWrite(LedM1, HIGH);
+    MLed = MLed - 1;
+  } else {
+    digitalWrite(LedM1, LOW);
+  }
+}
+
+void LEDhoras(int hours) {
+  short HLed = hours;
+  if (HLed >= 20) {
+    digitalWrite(LedH20, HIGH);
+    HLed = HLed - 20;
+  } else {
+    digitalWrite(LedH20, LOW);
+  }
+
+  if (HLed >= 10) {
+    digitalWrite(LedH10, HIGH);
+    HLed = HLed - 10;
+  } else {
+    digitalWrite(LedH10, LOW);
+  }
+
+  if (HLed >= 8) {
+    digitalWrite(LedH8, HIGH);
+    HLed = HLed - 8;
+  } else {
+    digitalWrite(LedH8, LOW);
+  }
+
+  if (HLed >= 4) {
+    digitalWrite(LedH4, HIGH);
+    HLed = HLed - 4;
+  } else {
+    digitalWrite(LedH4, LOW);
+  }
+
+  if (HLed >= 2) {
+    digitalWrite(LedH2, HIGH);
+    HLed = HLed - 2;
+  } else {
+    digitalWrite(LedH2, LOW);
+  }
+
+  if (HLed == 1) {
+    digitalWrite(LedH1, HIGH);
+    HLed = HLed - 1;
+  } else {
+    digitalWrite(LedH1, LOW);
+  }
+}
+
+void buttons() {
+  b1 = digitalRead(A1); //h+
+  b2 = digitalRead(A2); //h-
+  b3 = digitalRead(A3); //m+
+  b4 = digitalRead(A4); //m-
+  if (b1 == HIGH) {
+    horas++;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (horas > 23) {
+      horas = 0;
+    }
+  }
+  if (b2 == HIGH) {
+    horas--;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (horas > 23) {
+      horas = 23;
+    }
+  }
+  if (b3 == HIGH) {
+    minutos++;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (minutos > 59) {
+      minutos = 0;
+    }
+  }
+  if (b4 == HIGH) {
+    minutos--;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (minutos > 59) {
+      minutos = 59;
+    }
+  }
+}
+
+void bALARM() {
+  b1 = digitalRead(A1); //h+
+  b2 = digitalRead(A2); //h-
+  b3 = digitalRead(A3); //m+
+  b4 = digitalRead(A4); //m-
+  if (b1 == HIGH) {
+    ALARMh++;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (ALARMh > 23) {
+      ALARMh = 0;
+    }
+  }
+  if (b2 == HIGH) {
+    ALARMh--;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (ALARMh > 23) {
+      ALARMh = 23;
+    }
+  }
+  if (b3 == HIGH) {
+    ALARMmin++;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (ALARMmin > 59) {
+      ALARMmin = 0;
+    }
+  }
+  if (b4 == HIGH) {
+    ALARMmin--;
+    digitalWrite(buzzer, HIGH);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    delay(200);
+    if (ALARMmin > 59) {
+      ALARMmin = 59;
+    }
+  }
+}
+
+void timecheck () {
+  while (horas == ALARMh && minutos == ALARMmin && segundos == 0) {
+    marchaimperial();
+  }
+}
+
+void beep (unsigned char pin, int nota, long tempo)
+{
+  ledson();
+  timer();
+  tone(pin, nota, tempo);
+  ledson();
+  delay(tempo);
+  ledsoff();
+  noTone(pin);
+  delay(50);
+}
+
+void marchaimperial () {
+  beep(buzzer, a, 500);
+  beep(buzzer, a, 500);
+  beep(buzzer, a, 500);
+  beep(buzzer, f, 350);
+  beep(buzzer, cH, 150);
+
+  beep(buzzer, a, 500);
+  beep(buzzer, f, 350);
+  beep(buzzer, cH, 150);
+  beep(buzzer, a, 1000);
+
+  beep(buzzer, eH, 500);
+  beep(buzzer, eH, 500);
+  beep(buzzer, eH, 500);
+  beep(buzzer, fH, 350);
+  beep(buzzer, cH, 150);
+
+  beep(buzzer, gS, 500);
+  beep(buzzer, f, 350);
+  beep(buzzer, cH, 150);
+  beep(buzzer, a, 1000);
+
+  beep(buzzer, aH, 500);
+  beep(buzzer, a, 350);
+  beep(buzzer, a, 150);
+  beep(buzzer, aH, 500);
+  beep(buzzer, gSH, 250);
+  beep(buzzer, gH, 250);
+
+  beep(buzzer, fSH, 125);
+  beep(buzzer, fH, 125);
+  beep(buzzer, fSH, 250);
+  delay(250);
+  beep(buzzer, aS, 250);
+  beep(buzzer, dSH, 500);
+  beep(buzzer, dH, 250);
+  beep(buzzer, cSH, 250);
+
+  beep(buzzer, cH, 125);
+  beep(buzzer, b, 125);
+  beep(buzzer, cH, 250);
+  delay(250);
+  beep(buzzer, f, 125);
+  beep(buzzer, gS, 500);
+  beep(buzzer, f, 375);
+  beep(buzzer, a, 125);
+
+  beep(buzzer, cH, 500);
+  beep(buzzer, a, 375);
+  beep(buzzer, cH, 125);
+  beep(buzzer, eH, 1000);
+}
