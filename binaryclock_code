@@ -1,3 +1,5 @@
+//O fluxograma do código pode ser visualizado em: https://drive.google.com/file/d/1rhIYyROQneo3GxBW6rwuJLMN43ZwXu4f/view?usp=drivesdk
+
 //timer
 static unsigned long lastTick = 0;
 short unsigned segundos = 0;
