@@ -6,7 +6,7 @@ Just an Arduino based binary clock with a buzzer.
 O projeto consiste em uma interface de monitoramento do horário com display em leds que indicam dezenas e unidades tanto para as horas quanto para os minutos em números binários.
 Além disso, há a função de alarme, na qual o usuário pode definir um horário (a partir do uso dos botões e visualização nos leds) para que o alarme seja acionado. Quando o horário definido no alarme é alcançado, os leds piscam e uma música é reproduzida a partir de um buzzer alocado dentro do dispositivo.
 
-<img src="projeto-modelo.png" height="350" alt="Modelo em 3D do projeto.">
+<img src="projeto-modelo.png" height="300" alt="Modelo em 3D do projeto.">
 
 <img src="projeto-concluido-foto.png" height="350" alt="Projeto finalizado.">
 
